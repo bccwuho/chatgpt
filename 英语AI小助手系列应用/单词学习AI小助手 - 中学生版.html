@@ -90,8 +90,9 @@
     window.apikey = ""
     if (getCookie("apikey") != undefined && getCookie("apikey") != "") {
         window.apikey = getCookie("apikey");
+        window.apikey = prompt("请在输入框内输入并提交您从官方网站获取的apikey:", window.apikey);
+        setCookie("apikey", window.apikey);
     }
-
     else {
         window.apikey = prompt("请在输入框内输入并提交您从官方网站获取的apikey:","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");
         setCookie("apikey", window.apikey);
