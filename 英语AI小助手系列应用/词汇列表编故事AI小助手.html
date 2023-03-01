@@ -1,0 +1,220 @@
+<!doctype html>
+<html>
+    <head>        
+        <meta charset="utf-8">
+        <style>
+          /* Add your CSS styles here */
+          body {
+            background-color: #f2f2f2;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            font-size: 14px;
+          }
+          .container {
+            width: 80%;
+            margin: 0 auto;
+            text-align: center;
+            padding: 20px 0;
+          }
+          #chatgpt-response, #chat-gpt-input, #chat-gpt-tijiao {
+             font-family: "宋体"; 
+             font-size: 20px; 
+             color: #0000FF; 
+             font-weight: bold; 
+          }
+          #chat-gpt-tijiao {
+             font-family: "宋体"; 
+             font-size: 30px; 
+             color: #0000FF; 
+             font-weight: bold; 
+          }
+           /* Define styles for larger screens */
+          @media only screen and (min-width: 600px) {
+            body {
+              font-size: 18px;
+            }
+          }
+///Joe Style 创建一个带喇叭icon的button
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-icon {
+      width: 1em;
+      height: 1em;
+      vertical-align: middle;
+      fill: currentColor;
+      margin-right: 0.25em;
+    }
+/// Endof Joe style
+        </style>
+    
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <!-- favicon icon -->
+    <script>
+///Joe的代码
+    // 添加cookie
+    function setCookie(name, value) {
+        let days = 10;
+        var expires = '';
+
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = '; expires=' + date.toUTCString();
+        }
+
+        document.cookie = name + '=' + (value || '') + expires + '; path=/';
+    }
+
+    // 读取cookie
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+
+        return null;
+    }
+/// 开始的时候跳出窗口，输入apikey
+    window.apikey = ""
+    if (getCookie("apikey") != undefined && getCookie("apikey") != "") {
+        window.apikey = getCookie("apikey");
+        window.apikey = prompt("请在输入框内输入并提交您从官方网站获取的apikey:", window.apikey);
+        setCookie("apikey", window.apikey);
+    }
+    else {
+        window.apikey = prompt("请在输入框内输入并提交您从官方网站获取的apikey:","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");
+        setCookie("apikey", window.apikey);
+    }
+
+function speak(event) {
+/// 朗读 HREF中的文本
+  // 防止链接默认跳转
+  event.preventDefault();
+
+  // 获取包含在链接标签中的文本
+  const text = event.target.textContent;
+
+  // 创建一个新的 SpeechSynthesisUtterance 对象
+  const utterance = new SpeechSynthesisUtterance(text);
+
+  // 播放 SpeechSynthesisUtterance 对象
+  speechSynthesis.speak(utterance);
+}
+
+/// 朗读选中的文本
+  function speakSelection() {
+    const selection = window.getSelection();
+    const utterance = new SpeechSynthesisUtterance( ",.,.,.the!!!【】a,an" + selection.toString());  /////加 ",.the!!" 这些无声词和标点是为了等待一点时间，让最开始的音能听清楚
+    speechSynthesis.speak(utterance);
+  }
+///End of Joe的代码
+
+        async function callCHATGPT() {
+          var responseText1 = document.getElementById("chatgpt-response");
+          responseText1.innerHTML = "";
+      
+          function printMessage(message) {
+            var responseText = document.getElementById("chatgpt-response");
+            var index = 0;
+            var interval = setInterval(function() {
+              responseText.innerHTML += message[index];
+              index++;
+              if (index >= message.length) {
+                clearInterval(interval);
+              }
+            }, 2);
+          }
+      
+          var xhr = new XMLHttpRequest();
+          var url = "https://api.openai.com/v1/completions";
+          xhr.open("POST", url, true);
+          xhr.setRequestHeader("Content-Type", "application/json");
+          xhr.setRequestHeader("Authorization", "Bearer " + window.apikey );
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              var json = JSON.parse(xhr.responseText);
+              var response = json.choices[0].text;
+              var responseText = document.getElementById("chatgpt-response");
+              var index = 0;
+              var interval = setInterval(function() {
+                responseText.innerHTML += response[index];
+                index++;
+                if (index >= response.length) {
+                  clearInterval(interval);
+                }
+              }, 2);
+            }
+          };
+      
+          var data = JSON.stringify({
+            "prompt": "provide a 150-words short story,use all the words below in the list. Those words should be displayed in brackets.  Then provide a Chinese translation after the English text.\n==\n"+document.getElementById("chat-gpt-input").value,
+            "max_tokens": 2048,
+            "temperature": 0.7,
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 0,
+            "model": "text-davinci-003"
+          });
+          console.log(data);
+          await printMessage('已请求，请等待...');
+          await xhr.send(data);
+        }
+    </script>
+      
+    </head>
+    <body>
+        <header id="sticky-header" class="header-area">
+          <div class="container sm-100">
+            <div class="row">
+              <div class="col-md-3 col-sm-2">
+                <div class="logo text-upper">
+                  <h1>
+                   词汇列表编故事AI小助手
+<!--/// Joe：用svg 做一个小喇叭 icon-->
+	<button class="btn" onclick="speakSelection()"> 
+	    <svg class="btn-icon" viewBox="0 0 20 20">
+	      <path d="M10,0.5c-5.238,0-9.5,4.262-9.5,9.5c0,5.238,4.262,9.5,9.5,9.5c5.238,0,9.5-4.262,9.5-9.5C19.5,4.762,15.238,0.5,10,0.5z M10,18.25c-4.661,0-8.45-3.789-8.45-8.45S5.339,1.35,10,1.35s8.45,3.789,8.45,8.45S14.661,18.25,10,18.25z M7.648,5.977c-0.354,0-0.641,0.287-0.641,0.641v6.664c0,0.354,0.287,0.641,0.641,0.641c0.177,0,0.343-0.074,0.461-0.203l4.656-3.332c0.222-0.159,0.347-0.406,0.347-0.664c0-0.258-0.125-0.505-0.347-0.664l-4.656-3.332C7.991,6.05,7.825,5.977,7.648,5.977z"/>
+	    </svg>
+	    朗读选中的文本
+	</button>
+                  </h1>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+    
+        <div class="call-to-action-area gray-bg ptb-60">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-9 col-sm-9 col-xs-12 form-group">
+                <label></label>
+                <textarea id="chat-gpt-input" placeholder="输入描述" class="form-control" rows="10" resize="none" style="width: 100%; background-color: #f4f4f4; color: #333; border: 1px solid #ccc; border-radius: 12px;"></textarea>
+              </div>
+              <div class="col-md-3 col-sm-3 col-xs-12 call-to-action">
+                <button id="chat-gpt-tijiao" class="btn btn-large" autocomplete="off" onclick="callCHATGPT()" style="background-color: #333; color: #f4f4f4; border-radius: 10px;">
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  提交
+                </button>
+              </div>
+              <div class="col-md-9 col-sm-9 col-xs-12 form-group">
+                <label></label>
+                <textarea id="chatgpt-response" placeholder="请在输入框中输入最多10个单词的列表，系统会尽可能用这个单词列表编写1个英语小故事！如果对结果或格式不满意，可以再提交一次往往会获得更好的效果" class="form-control" rows="20" resize="none" style="width: 100%; background-color: #f4f4f4; color: #333; border: 1px solid #ccc; border-radius: 10px; overflow: scroll;" readonly="true"></textarea>
+              </div>
+            </div>
+        </div>
+    </body>
+
+    
