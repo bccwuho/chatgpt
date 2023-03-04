@@ -94,7 +94,7 @@
         setCookie("apikey", window.apikey);
     }
     else {
-        window.apikey = prompt("请在输入框内输入并提交您从官方网站获取的apikey:","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");
+        window.apikey = prompt("请在输入框内输入并提交您从官方网站获取的apikey:","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");
         setCookie("apikey", window.apikey);
     }
 
@@ -138,38 +138,47 @@ function speak(event) {
           }
       
           var xhr = new XMLHttpRequest();
-          var url = "https://api.openai.com/v1/completions";
+          var url = "https://api.openai.com/v1/chat/completions";
           xhr.open("POST", url, true);
           xhr.setRequestHeader("Content-Type", "application/json");
           xhr.setRequestHeader("Authorization", "Bearer "+window.apikey);
           xhr.onreadystatechange = function() {
             if (xhr.readyState === 4 && xhr.status === 200) {
               var json = JSON.parse(xhr.responseText);
-              var response = json.choices[0].text;
+              var response = json.choices[0];
+
+	// 获取 choices 数组中第一个元素的 message 对象
+	const message = response.message;
+	// 获取 message 对象中的 content 值
+	const content = message.content;
+
+	console.log(content);
+
               var responseText = document.getElementById("chatgpt-response");
               var index = 0;
               var interval = setInterval(function() {
-                responseText.innerHTML += response[index];
+                responseText.innerHTML += content[index];
                 index++;
-                if (index >= response.length) {
+                if (index >= content.length) {
                   clearInterval(interval);
                 }
               }, 2);
             }
           };
-      
-          var data = JSON.stringify({
-            "prompt": "告诉我"+document.getElementById("chat-gpt-input").value+"音标，然后显示词源和词根词缀，然后告诉我它的意思、用法和例句，例句用英语写，单词用幼儿园小朋友能说的简单词，每个例句显示完马上翻译。然后告诉我这个单词有哪些相关词汇或近义词，每个相关词汇或近义词给出简单词组成的例句。",
-            "max_tokens": 2048,
-            "temperature": 0.7,
-            "top_p": 1,
-            "frequency_penalty": 0,
-            "presence_penalty": 0,
-            "model": "text-davinci-003"
-          });
+
+            const data = {
+                model: 'gpt-3.5-turbo',
+                messages: [
+                  {"role": "system", "content": "你是一名很好的英语老师。"},
+	  {"role": "user", "content": "告诉我"+document.getElementById("chat-gpt-input").value+"的音标，然后显示词源和词根词缀，然后告诉我它的意思、用法和例句，例句用英语写，单词用幼儿园小朋友能说的简单词，每个例句显示完马上翻译。然后告诉我这个单词有哪些相关词汇或近义词，每个相关词汇或近义词给出简单词组成的例句。"}
+                ],
+                max_tokens: 3000,
+                temperature: 0.5,
+            };
+            xhr.send(JSON.stringify(data));      
+
           console.log(data);
           await printMessage('已请求，请等待...');
-          await xhr.send(data);
         }
     </script>
       
